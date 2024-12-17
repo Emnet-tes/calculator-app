@@ -19,11 +19,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String input = '';
+  String inputforUser = '';
   String result = '';
   final List<String> buttons = [
     'C',
     '%',
-    '!',
+    'Ans',
     '/',
     '7',
     '8',
@@ -91,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    input,
+                    inputforUser,
                     style: TextStyle(fontSize: 30),
                   ),
                 ),
@@ -125,6 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       buttonTapped: () => {
                         setState(() {
                           input = '';
+                          inputforUser = '';
                           result = '';
                         })
                       },
@@ -137,9 +139,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       textColor: Colors.white,
                       text: buttons[index],
                       buttonTapped: () => {
-                        setState(() {
-                          input += buttons[index];
-                        })
+                        if (index == 2)
+                          {
+                            setState(() {
+                              handelAns(value);
+                            })
+                          }
+                        else
+                          {
+                            setState(() {
+                              input += value;
+                            })
+                          }
                       },
                     );
                   }
@@ -151,6 +162,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       buttonTapped: () => {
                         setState(() {
                           input = input.substring(0, input.length - 1);
+                          inputforUser = inputforUser.substring(
+                              0, inputforUser.length - 1);
                         })
                       },
                     );
@@ -166,7 +179,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       else
                         {
                           setState(() {
-                            input += buttons[index];
+                            input += value;
+                            inputforUser += value;
                           })
                         }
                     },
@@ -189,6 +203,18 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         result = 'Invalid input';
       });
+    }
+  }
+
+  handelAns(value) {
+    if (result.isEmpty) {
+      result = 'No Input';
+    } else if (inputforUser.contains('Ans')) {
+      inputforUser += value;
+      input += result;
+    } else {
+      inputforUser = value;
+      input = result;
     }
   }
 }

@@ -1,5 +1,4 @@
-import 'dart:math';
-
+import 'dart:math' as math;
 import 'package:calculator/components/button.dart';
 import 'package:calculator/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +16,7 @@ class ScientificPage extends StatefulWidget {
 
 class _ScientificPageState extends State<ScientificPage> {
   String input = '';
+  String inputforUser = '';
   String result = '';
   final List<String> buttons = [
     'log',
@@ -29,9 +29,9 @@ class _ScientificPageState extends State<ScientificPage> {
     'sin',
     'cos',
     'tan',
-    'C',
-    '|x|',
-    '1/x',
+    'π',
+    '!',
+    '√',
     '%',
     '*',
     '^',
@@ -39,12 +39,12 @@ class _ScientificPageState extends State<ScientificPage> {
     '8',
     '9',
     '/',
-    '√',
+    'Ans',
     '4',
     '5',
     '6',
     '-',
-    'π',
+    'C',
     '1',
     '2',
     '3',
@@ -98,7 +98,7 @@ class _ScientificPageState extends State<ScientificPage> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    input,
+                    inputforUser,
                     style: TextStyle(fontSize: 30),
                   ),
                 ),
@@ -126,7 +126,7 @@ class _ScientificPageState extends State<ScientificPage> {
                     final op = isOperator(value);
                     final buttonChoice = op
                         ? Colors.blueAccent[700]
-                        : (index == 10 || index == 30)
+                        : (index == 20 || index == 25 || index == 30)
                             ? Colors.grey[500]
                             : buttonColor;
                     return Button(
@@ -134,45 +134,25 @@ class _ScientificPageState extends State<ScientificPage> {
                       textColor: op ? Colors.white : buttonTextColor,
                       text: buttons[index],
                       buttonTapped: () => {
-                        if (index == 10)
-                          {
-                            setState(() {
-                              input = '';
-                              result = '';
-                            })
-                          }
+                        if (index == 20)
+                          {handelAns(value)}
+                        else if (index == 25)
+                          {input = '', inputforUser = '', result = ''}
                         else if (index == 30)
                           {
-                            setState(() {
-                              input = input.substring(0, input.length - 1);
-                            })
+                            input = input.substring(0, input.length - 1),
+                            inputforUser = inputforUser.substring(
+                                0, inputforUser.length - 1)
                           }
                         else if (index == 34)
                           {
                             // result
-                            {equalTapped()}
+                            equalTapped()
                           }
                         else
                           {
-                            if (index == 25)
-                              {
-                                setState(() {
-                                  input += pi.toString();
-                                })
-                              }
-                            else if (index == 31)
-                              {
-                                setState(() {
-                                  input += e.toString();
-                                })
-                              }
-                            else
-                              {
-                                setState(() {
-                                  input += value;
-                                })
-                              }
-                          }
+                            input += value, inputforUser += value},
+                        setState(() {})
                       },
                     );
                   }))
@@ -181,17 +161,32 @@ class _ScientificPageState extends State<ScientificPage> {
 
   void equalTapped() {
     try {
+      
+      ContextModel cm = ContextModel();
+      var E = Variable('e');
+      var pi = Variable('π');
+      cm.bindVariable(pi, Number(math.pi));
+      cm.bindVariable(E, Number(math.e));
       Parser p = Parser();
       Expression exp = p.parse(input);
-      ContextModel cm = ContextModel();
-      // cm.bindVariable('π', Number(pi));
-      // cm.bindVariable('e', Number(e));
       double ans = exp.evaluate(EvaluationType.REAL, cm);
       setState(() {
         result = ans.toString();
       });
     } catch (e) {
       result = 'Invalid Input';
+    }
+  }
+
+  handelAns(value) {
+    if (result.isEmpty) {
+      result = 'No Input';
+    } else if (inputforUser.contains('Ans')) {
+      inputforUser += value;
+      input += result;
+    } else {
+      inputforUser = value;
+      input = result;
     }
   }
 }
