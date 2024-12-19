@@ -1,8 +1,8 @@
 import 'package:calculator/components/button.dart';
 import 'package:calculator/pages/scientific_page.dart';
-import 'package:flutter/material.dart';
-import 'package:math_expressions/math_expressions.dart';
 import 'package:calculator/utils/utils.dart';
+import 'package:flutter/material.dart';
+import 'package:eval_ex/expression.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({
@@ -118,73 +118,28 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemBuilder: (context, index) {
                   final value = buttons[index];
                   final op = isOperator(value);
-                  if (index == 0) {
-                    return Button(
-                      color: Colors.grey[500],
-                      textColor: Colors.white,
-                      text: buttons[index],
-                      buttonTapped: () => {
-                        setState(() {
-                          input = '';
-                          inputforUser = '';
-                          result = '';
-                        })
-                      },
-                    );
-                  }
-
-                  if (index == 1 || index == 2) {
-                    return Button(
-                      color: Colors.grey[500],
-                      textColor: Colors.white,
-                      text: buttons[index],
-                      buttonTapped: () => {
-                        if (index == 2)
-                          {
-                            setState(() {
-                              handelAns(value);
-                            })
-                          }
-                        else
-                          {
-                            setState(() {
-                              input += value;
-                            })
-                          }
-                      },
-                    );
-                  }
-                  if (index == 18) {
-                    return Button(
-                      color: buttonColor,
-                      textColor: buttonTextColor,
-                      text: buttons[index],
-                      buttonTapped: () => {
-                        setState(() {
-                          input = input.substring(0, input.length - 1);
-                          inputforUser = inputforUser.substring(
-                              0, inputforUser.length - 1);
-                        })
-                      },
-                    );
-                  }
-
+                  final buttonChoice = op
+                      ? Colors.blueAccent[700]
+                      : (index < 4)
+                          ? Colors.grey[500]
+                          : buttonColor;
                   return Button(
-                    color: op ? Colors.blueAccent[700] : buttonColor,
-                    textColor: op ? Colors.white : buttonTextColor,
-                    text: buttons[index],
-                    buttonTapped: () => {
-                      if (index == 19)
-                        {equalTapped()}
-                      else
-                        {
-                          setState(() {
-                            input += value;
-                            inputforUser += value;
-                          })
-                        }
-                    },
-                  );
+                      color: buttonChoice,
+                      textColor: op ? Colors.white : buttonTextColor,
+                      text: buttons[index],
+                      buttonTapped: () => {
+                            if (index == 0)
+                              {input = '', inputforUser = ''}
+                            else if (index == 2)
+                              {handelAns(value)}
+                            else if (index == 18)
+                              {handleDel()}
+                            else if (index == 19)
+                              {equalTapped()}
+                            else
+                              {input += value, inputforUser += value},
+                            setState(() {})
+                          });
                 }),
           )
         ]));
@@ -192,16 +147,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void equalTapped() {
     try {
-      Parser p = Parser();
-      Expression exp = p.parse(input);
-      ContextModel cm = ContextModel();
-      double ans = exp.evaluate(EvaluationType.REAL, cm);
+      Expression exp = Expression(input);
+      var ans = exp.eval().toString();
       setState(() {
-        result = ans.toString();
+        if (ans.length > 15) {
+          ans = ans.substring(0, 15);
+        }
+        result = ans;
       });
     } catch (e) {
       setState(() {
-        result = 'Invalid input';
+        result = 'Error';
       });
     }
   }
@@ -215,6 +171,15 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       inputforUser = value;
       input = result;
+    }
+  }
+
+  handleDel() {
+    try {
+      input = input.substring(0, input.length - 1);
+      inputforUser = inputforUser.substring(0, inputforUser.length - 1);
+    } catch (e) {
+      result = 'No Input';
     }
   }
 }

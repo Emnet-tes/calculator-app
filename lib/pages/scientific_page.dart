@@ -1,8 +1,9 @@
-import 'dart:math' as math;
+
 import 'package:calculator/components/button.dart';
 import 'package:calculator/utils/utils.dart';
+import 'package:eval_ex/expression.dart';
 import 'package:flutter/material.dart';
-import 'package:math_expressions/math_expressions.dart';
+
 
 class ScientificPage extends StatefulWidget {
   const ScientificPage(
@@ -50,7 +51,7 @@ class _ScientificPageState extends State<ScientificPage> {
     '3',
     '+',
     'del',
-    'e',
+    ',',
     '0',
     '.',
     '=',
@@ -136,22 +137,21 @@ class _ScientificPageState extends State<ScientificPage> {
                       buttonTapped: () => {
                         if (index == 20)
                           {handelAns(value)}
+                        else if (index == 10)
+                          {input += 'PI', inputforUser += 'π'}
+                        else if (index == 12)
+                          {input += 'sqrt(', inputforUser += '√('}
                         else if (index == 25)
                           {input = '', inputforUser = '', result = ''}
                         else if (index == 30)
-                          {
-                            input = input.substring(0, input.length - 1),
-                            inputforUser = inputforUser.substring(
-                                0, inputforUser.length - 1)
-                          }
+                          {handleDel()}
                         else if (index == 34)
                           {
                             // result
                             equalTapped()
                           }
                         else
-                          {
-                            input += value, inputforUser += value},
+                          {input += value, inputforUser += value},
                         setState(() {})
                       },
                     );
@@ -161,20 +161,16 @@ class _ScientificPageState extends State<ScientificPage> {
 
   void equalTapped() {
     try {
-      
-      ContextModel cm = ContextModel();
-      var E = Variable('e');
-      var pi = Variable('π');
-      cm.bindVariable(pi, Number(math.pi));
-      cm.bindVariable(E, Number(math.e));
-      Parser p = Parser();
-      Expression exp = p.parse(input);
-      double ans = exp.evaluate(EvaluationType.REAL, cm);
+      Expression exp = Expression(input);
+      var ans = exp.eval().toString();
       setState(() {
-        result = ans.toString();
+        if(ans.length > 15){
+          ans = ans.substring(0, 15);
+        }
+        result = ans;
       });
     } catch (e) {
-      result = 'Invalid Input';
+      result = 'Error';
     }
   }
 
@@ -187,6 +183,15 @@ class _ScientificPageState extends State<ScientificPage> {
     } else {
       inputforUser = value;
       input = result;
+    }
+  }
+
+  handleDel() {
+    try {
+      input = input.substring(0, input.length - 1);
+      inputforUser = inputforUser.substring(0, inputforUser.length - 1);
+    } catch (e) {
+      result = 'No Input';
     }
   }
 }
